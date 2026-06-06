@@ -1,0 +1,52 @@
+import cv2
+import time
+import handtrackingmodule as htm
+
+# ----------------------------
+# Camera setup
+# ----------------------------
+cap = cv2.VideoCapture(0)
+
+# ----------------------------
+# Create detector object
+# ----------------------------
+detector = htm.handDetector()
+
+pTime = 0
+
+while True:
+    success, img = cap.read()
+
+    # Detect hand
+    img = detector.findHands(img, draw=True)
+
+    # Get landmark list
+    lmList = detector.findPosition(img, draw=False)
+
+    # Check if hand detected
+    if len(lmList) != 0:
+        # Thumb tip (id = 4)
+        print("Thumb Tip:", lmList[4])
+
+    # FPS calculation
+    cTime = time.time()
+    fps = 1 / (cTime - pTime)
+    pTime = cTime
+
+    # Show FPS on screen
+    cv2.putText(img, str(int(fps)), (10, 70),
+                cv2.FONT_HERSHEY_PLAIN, 3,
+                (255, 0, 255), 3)
+
+    # Show output
+    cv2.imshow("Hand Tracking Project", img)
+
+    # Exit condition (press q)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# ----------------------------
+# Cleanup
+# ----------------------------
+cap.release()
+cv2.destroyAllWindows()
